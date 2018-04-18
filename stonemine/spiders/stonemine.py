@@ -12,7 +12,7 @@ class StonemineSpider(CrawlSpider):
     allowed_domains = ["alibabadogaltas.com.tr"]
     start_urls = ["https://www.alibabadogaltas.com.tr/dogal-tas-diziler"]
     rules = (
-#        Rule(LinkExtractor(allow=(), restrict_xpaths=('//div[contains(@class,"productPager")]//a[@class="next"]',)), callback="parse_items", follow= True),
+        Rule(LinkExtractor(allow=(), restrict_xpaths=('//div[contains(@class,"productPager")]//a[@class="next"]',)), callback="parse_items", follow= True),
         Rule(LinkExtractor(allow=(), restrict_xpaths=('//a[contains(@class,"productDescription detailLink")]',)), callback="parse_items", follow= False),
     )
     def parse_items(self, response):
@@ -30,10 +30,11 @@ class StonemineSpider(CrawlSpider):
         item['title'] = title
         item['price'] = price
         #
-        details = re.findall("[^\n]+\n+:\n+[^\n]+",details,flags=re.U) 
+        details = re.findall("[^\n]+\n+:\n+[^\n]+","".join(details),flags=re.U) 
         details = pd.DataFrame([d.split(":") for d in details]).applymap(lambda x: x.strip())
-        details = pd.concat([details,pd.DataFrame([["title",title],["price",price]])])
-        details = details.drop([0],axis=1)[1].to_dict()    
+        details = pd.concat([details,pd.DataFrame([["title",title],["price",price]])]).values.tolist()
+        details = "\n".join(["|".join(detail) for detail in details])
+        # details = details.drop([0],axis=1)[1].to_dict()    
         item["details"] = details
         #
         return(item)
