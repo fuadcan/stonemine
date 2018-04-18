@@ -3,7 +3,7 @@ from scrapy.linkextractors import LinkExtractor
 from scrapy.selector import HtmlXPathSelector
 from ..items import StoneMineItem
 from datetime import datetime
-# import pandas as pd
+import pandas as pd
 import re
 
 
@@ -25,8 +25,13 @@ class StonemineSpider(CrawlSpider):
         details          = hxs.xpath('//div[@id="productDetailTab"]//text()').extract()
         price            = hxs.xpath('//span[@class="product-price"]/text()').extract()
         #
-        item["title"]      = "".join(title)
-        item["details"]    = "".join(details)
-        item["price"]      = "".join(price)
+        title  = "".join(title)
+        price  = "".join(price)
         #
+        details = re.findall("[^\n]+\n+:\n+[^\n]+",details,flags=re.U) 
+        details = DataFrame([d.split(":") for d in details])
+        details = pd.concat([details,pd.DataFrame([["title",title],["price",price]])])
+        
+        item["details"] = details
+
         return(item)
