@@ -27,11 +27,13 @@ class StonemineSpider(CrawlSpider):
         #
         title  = "".join(title)
         price  = "".join(price)
+        item['title'] = title
+        item['price'] = price
         #
         details = re.findall("[^\n]+\n+:\n+[^\n]+",details,flags=re.U) 
-        details = DataFrame([d.split(":") for d in details])
+        details = pd.DataFrame([d.split(":") for d in details]).applymap(lambda x: x.strip())
         details = pd.concat([details,pd.DataFrame([["title",title],["price",price]])])
-        
+        details = details.drop([0],axis=1)[1].to_dict()    
         item["details"] = details
-
+        #
         return(item)
